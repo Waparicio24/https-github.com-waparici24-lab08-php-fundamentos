@@ -2,16 +2,41 @@
 declare(strict_types=1);
 
 /**
- * Lee estudiante.json (raíz del repositorio) y devuelve un arreglo con:
- * nombre, apellido, cedula, github_user.
- * Esta función te la damos hecha; úsala con require_once.
+ * Lee estudiante.json desde la raíz del proyecto
+ * y devuelve los datos del estudiante:
+ * nombre, apellido, cedula y github_user.
  */
 function cargar_estudiante(): array
 {
     $ruta = __DIR__ . '/../estudiante.json';
-    $datos = json_decode((string) file_get_contents($ruta), true);
-    if (!is_array($datos)) {
-        throw new RuntimeException('estudiante.json no es un JSON válido');
+
+    if (!file_exists($ruta)) {
+        throw new RuntimeException(
+            'No se encontró el archivo estudiante.json'
+        );
     }
+
+    $contenido = file_get_contents($ruta);
+
+    if ($contenido === false) {
+        throw new RuntimeException(
+            'No se pudo leer estudiante.json'
+        );
+    }
+
+    $datos = json_decode($contenido, true);
+
+    if (!is_array($datos)) {
+        throw new RuntimeException(
+            'estudiante.json no contiene un JSON válido'
+        );
+    }
+
+    if (!isset($datos['cedula']) || !is_string($datos['cedula'])) {
+        throw new RuntimeException(
+            'Falta la cédula del estudiante en estudiante.json'
+        );
+    }
+
     return $datos;
 }
