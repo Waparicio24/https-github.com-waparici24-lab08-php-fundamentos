@@ -6,8 +6,14 @@ require_once __DIR__ . '/../lib/estudiante.php';
 $est = cargar_estudiante();
 $cfg = require __DIR__ . '/../config/db.php';
 
-if (!isset($est['cedula']) || !is_string($est['cedula'])) {
-    throw new RuntimeException('No se encontró una cédula válida en estudiante.json');
+if (
+    !isset($est['cedula'], $est['github_user']) ||
+    !is_string($est['cedula']) ||
+    !is_string($est['github_user'])
+) {
+    throw new RuntimeException(
+        'Faltan la cédula o el usuario de GitHub en estudiante.json'
+    );
 }
 
 $db = new mysqli(
@@ -31,9 +37,14 @@ $filas = (int) $db
     ->query('SELECT COUNT(*) FROM estudiantes')
     ->fetch_row()[0];
 
-// Generar el token usando la cédula de estudiante.json.
-$cedula = trim($est['cedula']);
-$token = substr(hash('sha256', $cedula), 0, 10);
+$token = substr(
+    hash(
+        'sha256',
+        $est['cedula'] . '|' . $est['github_user'] . '|WEB2026-L8'
+    ),
+    0,
+    10
+);
 
 echo json_encode([
     'php_version' => PHP_VERSION,
